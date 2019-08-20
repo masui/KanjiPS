@@ -1,22 +1,22 @@
-$@4A;z(JPostScript$@$r1Q?t;z$N$_$N(JPostScript$@$KJQ49$9$k%U%#%k%?(J"kanjips"$@$H(J
-$@$=$l$r;H$C$?%D!<%k$G$9!#(J
+漢字PostScriptを英数字のみのPostScriptに変換するフィルタ"kanjips"と
+それを使ったツールです。
 
 
-	kanjips:	$@4A;z(JPostScript$@%U%#%k%?(J
-	jenscript:	$@%F%-%9%H"*(JPostScript$@%U%#%k%?(J
-	mp:		mail/news$@"*(JPostScript$@%U%#%k%?(J
-	samples:	$@4A;z(JPostScript$@%5%s%W%k%U%!%$%k(J
+	kanjips:	漢字PostScriptフィルタ
+	jenscript:	テキスト→PostScriptフィルタ
+	mp:		mail/news→PostScriptフィルタ
+	samples:	漢字PostScriptサンプルファイル
 
 
-"Configure"$@$r5/F0$7$F!"Ld$o$l$k$^$^$KEz$($?8e(Jmake$@$9$l$P$G$-$"$,$j$G$9!#(J
-$@4A;z%U%)%s%H$O$I$l$+$R$H$D$G$b$"$l$P$$$$$G$9!#(J
+"Configure"を起動して、問われるままに答えた後makeすればできあがりです。
+漢字フォントはどれかひとつでもあればいいです。
 
-$@%U%)%s%H$r3JG<$9$k%G%#%l%/%H%j$O(J":"$@$G6h@Z$C$FJ#?t;XDj$9$k$3$H$,$G$-$^$9!#(J
-($@Nc(J: "/usr/local/font1:/usr/local/font2")
-$@%U%)%s%HL>$rJ#?t;XDj$9$k$H$-$O(J","$@$G6h@Z$C$F2<$5$$!#(J($@Nc(J: "jis16,jis24")
+フォントを格納するディレクトリは":"で区切って複数指定することができます。
+(例: "/usr/local/font1:/usr/local/font2")
+フォント名を複数指定するときは","で区切って下さい。(例: "jis16,jis24")
 
-$@3F%D!<%k$NF0:n$K$D$$$F$O3F%G%#%l%/%H%j$N2<$N(JREADME$@%U%!%$%k$r;2>H(J
-$@$7$F2<$5$$!#(J
+各ツールの動作については各ディレクトリの下のREADMEファイルを参照
+して下さい。
 
-$@%P%0>pJs!&(J$@MWK>$J$I$O(J masui@cs.cmu.edu $@$^$?$O(J masui@shpcsl.sharp.co.jp
-$@$^$G$*Aw$j2<$5$$!#(J
+バグ情報・要望などは masui@cs.cmu.edu または masui@shpcsl.sharp.co.jp
+までお送り下さい。
