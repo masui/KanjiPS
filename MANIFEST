@@ -1,0 +1,38 @@
+After all the kanjips kits are run you should have the following files:
+
+Filename		Kit Description
+--------		--- -----------
+./COPYRIGHT              1 -
+./Configure              1 Run First.
+./MANIFEST               3 File list
+./Makefile               2 initial fake Makefile
+./Makefile.SH            3 Produces Makefile
+./README                 1 Read Me First.
+./config.h.SH            3 Produces config.h.
+./jenscript/README       1 text -> PostScript
+./jenscript/jenscript.SH 2 -
+./kanjips/Makefile.SH    1 -
+./kanjips/README         1 -
+./kanjips/dotfont.c      3 -
+./kanjips/fonts.c        3 -
+./kanjips/gmwfont.c      3 -
+./kanjips/header.c       3 -
+./kanjips/headerfile     3 -
+./kanjips/hersheyfont.c  3 -
+./kanjips/kanjips.c      2 -
+./kanjips/kanjips.h      3 -
+./kanjips/kanjips.z      3 -
+./kanjips/lwfont.c       3 -
+./kanjips/oafont.c       2 -
+./kanjips/outlinefont.c  3 -
+./kanjips/sub.c          3 -
+./kanjips/texfont.c      2 -
+./kanjips/texfont.h      2 -
+./kanjips/x11font.c      3 -
+./mp/README              1 mail -> PostScript
+./mp/mp.SH               1 -
+./samples/namecard.ps    3 Samples
+./samples/nenga.ps       3 -
+./text2x/README          1 text -> C program which creates it
+./text2x/text2c.SH       3 -
+./text2x/text2perl.SH    3 -

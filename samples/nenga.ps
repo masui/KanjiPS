@@ -1,0 +1,67 @@
+%!
+%%DocumentFonts: jis24
+%
+%	1988 no nengajou.....
+%
+
+290 340 translate
+
+gsave
+
+/jis24 findfont 100 scalefont setfont
+
+/Tatsu (辰) def
+
+0.95 setgray
+0 100 300 {
+	/x exch def 
+	0 100 500 {
+		x exch moveto Tatsu show 
+	} for 
+} for
+
+0 setgray
+50 350 moveto
+
+/jis24 findfont 40 scalefont setfont
+20 0 (謹賀新年) ashow
+
+/jis24 findfont 12 scalefont setfont
+60 300 moveto
+(旧年中は大変お世話になりました) show
+60 270 moveto
+(本年もよろしくお願い申しあげます) show
+200 240 moveto
+(一九八八年) show 12 0 rmoveto (元旦) show
+
+gsave
+%
+% Display a Dragon Curve
+%
+/depth 0 def
+/maxdepth 10 def
+/down { /depth depth 1 add def} def
+/up { /depth depth 1 sub def} def
+
+100 100 translate
+/Dragon
+{
+  gsave
+  2 sqrt 2 div dup scale
+  1 setlinewidth
+  [5 20 ] 0 setdash
+  down 
+  depth maxdepth ne
+  { 100 100 translate -45 rotate Dragon -90 rotate Dragon }
+  { 0 0 moveto 100 100 lineto 200 0 lineto stroke } ifelse
+  up
+  grestore 
+} def
+
+2.3 2.3 scale
+45 rotate
+Dragon
+
+grestore
+
+showpage

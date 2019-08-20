@@ -1,0 +1,195 @@
+/*
+	Kanji PostScript Filter
+
+				1989 2/21 MASUI Toshiyuki
+	
+	%%DefineFonts: fontname
+*/
+#include <stdio.h>
+#include <ctype.h>
+#include "config.h"
+#include "kanjips.h"
+
+static Font *fonts[MAXFONTS];	/* font data structure */
+static int nfonts = 0;		/* number of Kanji fonts being used */
+
+unsigned char *zs;	/* for state machine zztrans() */
+
+FILE *infile = stdin,*outfile = stdout;
+
+extern Font *openfont();
+
+main(argc,argv) char **argv;
+{
+	unsigned char linebuf[BUFMAX];
+	int line;
+
+	switch(argc){
+		case 1:
+			break;
+		case 2:
+			if((infile = fopen(argv[1],"r")) == NULL){
+				fprintf(stderr,"Can't open %s\n",argv[1]);
+				exit(1);
+			}
+			break;
+		default:
+			fprintf(stderr,"kanjips [filename]\n");
+			exit(1);
+	}
+	zzinit(0);	/* reset the state machine */
+	for(line = 0; fgets(linebuf,BUFMAX,infile); line++){
+		if(line == 1){
+			outheader();
+		}
+		if(strmatch(linebuf,CDSTR)){
+			fprintf(outfile,"%s",linebuf);
+			conform(linebuf);
+		}
+		else { /* normal line */
+			for(zs=linebuf; *zs; zs++){
+				zztrans(*zs,0); /* process 1 line */
+			}
+		}
+	}
+}
+conform(s) unsigned char *s;
+/*
+	Treat a comment line in Conforming Documents
+*/
+{
+	register Font *font;
+	unsigned char *fontname;
+
+	s += strlen(CDSTR);
+	while(isspace(*s)) s++;
+	if(strmatch(s,DFSTR)){ /* %%DocumentFonts */
+		s += strlen(DFSTR);
+		forgetfont();
+		for(nfonts = 0; *s && nfonts < MAXFONTS; s++){
+			while(isspace(*s)) s++;
+			fontname = s;
+			while(!isspace(*s)) s++;
+			*s = '\0';
+			if(strmatch(fontname,"(atend)")){
+				fprintf(stderr,
+					"Used fonts must be declared first!\n");
+				exit(1);
+			}
+			if((font = openfont(fontname)) == NULL){
+				fprintf(stderr,
+					"font %s not found\n",fontname);
+				exit(1);
+			}
+			fonts[nfonts++] = font;
+		}
+		forgetdef();
+	}
+	else if(strmatch(s,PGSTR)){ /* %%Page */
+		forgetdef();
+	}
+}
+forgetfont()
+{
+	register i;
+	register Font *font;
+	for(i=0; i< nfonts; i++){
+		if((font = fonts[i]) == NULL) continue;
+		closefont(font);
+		fonts[i] = NULL;
+	}
+}
+
+static int registcodes[MAXREGIST];	/* remembered font codes */
+static int ncodes = 0;			/* number of remembered fonts */
+
+static regist(code) int code;
+{
+	register i;
+	for(i=0; i<ncodes; i++){
+		if(registcodes[i] == code) return;
+	}
+	fprintf(outfile,"$kdata begin\n");
+	for(i=0; i<nfonts; i++){
+		definefont(fonts[i],code);
+	}
+	fprintf(outfile,"end\n");
+	registcodes[ncodes++] = code;
+}
+static forgetdef()
+{
+	ncodes = 0;	/* forget about sent data */
+}
+/*
+	State Machine Definition
+*/
+static char strbuf[BUFMAX];
+#define ZZMAXSEQ 1024
+#define PRINT() ZZCHAR[ZZCHARS]='\0'; fprintf(outfile,"%s",ZZCHAR);
+#define CAT() ZZCHAR[ZZCHARS]='\0'; strcat(strbuf,ZZCHAR);
+#define COPY() ZZCHAR[ZZCHARS]='\0'; strcpy(strbuf,ZZCHAR);
+#define PUSHBACK() zs--
+#define ZZDEFAULT fprintf(outfile,"<?>")
+static int jiscode[] = {
+	/* sp   maru   kagi  kakko   ten   nakaten   wo     A */
+/* a */	0xa1a0,0xa1a3,0xa1d6,0xa1e7,0xa1a2,0xa1a6,0xa5f2,0xa5a1,
+	/* I      U      E      O     YA     YU     YO     TU */
+	0xa5a3,0xa5a5,0xa5a7,0xa5a9,0xa5e3,0xa5e5,0xa5e7,0xa5c3,
+	/* bou    a      i      u      e      o     ka     ki */
+/* b */	0xa1bc,0xa5a2,0xa5a4,0xa5a6,0xa5a8,0xa5aa,0xa5ab,0xa5ad,
+	/* ku    ke     ko     sa     si     su     se     so */
+	0xa5af,0xa5b1,0xa5b3,0xa5b5,0xa5b7,0xa5b9,0xa5bb,0xa5bd,
+	/* ta    ti     tu     te     to     na     ni     nu */
+/* c */	0xa5bf,0xa5c1,0xa5c4,0xa5c6,0xa5c8,0xa5ca,0xa5cb,0xa5cc,
+	/* ne    no     ha     hi     hu     he     ho     ma */
+	0xa5cd,0xa5ce,0xa5cf,0xa5d2,0xa5d5,0xa5d8,0xa5db,0xa5de,
+	/* mi    mu     me     mo     ya     yu     yo     ra */
+/* d */	0xa5df,0xa5e0,0xa5e1,0xa5e2,0xa5e4,0xa5e6,0xa5e8,0xa5e9,
+	/* ri    ru     re     ro     wa      n  dakuten handaku */
+	0xa5ea,0xa5eb,0xa5ec,0xa5ed,0xa5ef,0xa5f3,0xa1ab,0xa1ac
+};
+%%
+[\040\t\n]				{ PRINT(); }
+[^\040\t\n\[\]\(\)\<\>\%]+[\040\t\n\%\[\]\(\)\<\>]
+					{ unsigned char c = ZZCHAR[ZZCHARS-1];
+					  ZZCHAR[ZZCHARS-1] = '\0';
+					  PRINT();
+					  PUSHBACK(); }
+\[					{ PRINT(); }
+\]					{ PRINT(); }
+\%.*$					{ PRINT(); }
+\(					{ COPY(); BEGIN STRING; }
+\<					{ PRINT(); BEGIN HEX; }
+<STRING>\)				{
+					  CAT(); 
+					  fprintf(outfile,"%s",strbuf);
+					  BEGIN 0;
+					}
+<STRING>\\[0-9]..			{ CAT(); }
+<STRING>\\[^0-9]			{ CAT(); }
+<STRING>\033\$.				{ BEGIN JIS; }
+<STRING>[\241-\376].			{  /* EUC Kanji */
+					  sprintf(strbuf+strlen(strbuf),
+						"\\%03o\\%03o",
+					       ZZCHAR[0],ZZCHAR[1]);
+					  regist((ZZCHAR[0]<<8)+ZZCHAR[1]);
+					}
+<STRING>[\216].				{  /* EUC Kana */
+					  sprintf(strbuf+strlen(strbuf),
+						"\\%03o\\%03o",
+					       ZZCHAR[0],ZZCHAR[1]);
+					  regist(jiscode[ZZCHAR[1]-0xa0]);
+					}
+<STRING>[^\\\)\033\216\241-\376]	{ CAT(); }
+<JIS>\033\(.				{ BEGIN STRING; }
+<JIS>[^\033].				{
+					  sprintf(strbuf+strlen(strbuf),
+						"\\%03o\\%03o",
+						ZZCHAR[0]+0x80,ZZCHAR[1]+0x80);
+					  regist(((ZZCHAR[0]+0x80)<<8)+
+						ZZCHAR[1]+0x80);
+					}
+<HEX>[0-9a-fA-F]			{ PRINT(); }
+<HEX>[^0-9a-fA-F\>]			{ PRINT(); }
+<HEX>\>					{ PRINT(); BEGIN 0; }
+%%

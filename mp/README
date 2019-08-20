@@ -1,0 +1,18 @@
+mpはmailやnewsを美しく印刷するためのフィルタで、以前newsに
+流れていたものをperlで書き換えたものです。
+
+●オプション
+
+	-p profile	ヘッダをprofileに置き換えます。
+
+	-f fontname	使用する漢字フォント名を指定します。
+			デフォルトは"jis32"になっています。これが
+			無い場合は適当に書き直して下さい。
+
+	-E		EUCを受け付けます。(デフォルトはJISとSJIS)
+
+●起動法
+
+	% show | mp | kanjips | lpr -Plw
+
+		mailを印刷します。

@@ -1,0 +1,172 @@
+%
+%	Header for Kanji PostScript
+%
+%		1989 2/3 MASUI Toshiyuki @ SHARP CSL
+%
+/$kdata 750 dict def	% dictionary for kanji dot/outline
+/$kanjips 100 dict def	% dictionary for kanjiPS operators
+$kanjips begin
+
+/newdotfont		% fontid dotsize newdotfont --- 
+			%	initialize a new dot font dictionary 
+{
+	/dotsize exch def
+	/newname exch def
+	/fsize 256 def
+	newname 11 dict def		% allocate new font dictionary 
+	newname load begin
+		/FontName newname def
+		/DotSize dotsize def
+		/FontType 3 def			% user font type
+		/FontMatrix [1 0 0 1 0 0] def
+		/FontBBox [0 0 dotsize dotsize] def
+		/BitMaps fsize array def
+		/BuildChar {dotbuilder} def
+		/Encoding fsize array def
+		/DefineProc {definedot} def
+		/KanjiPS 0 def
+		0 1 fsize 1 sub {Encoding exch /.notdef put} for
+	end
+	newname newname load definefont pop
+} def
+
+/ch-image {ch-data 0 get} def
+/ch-width {ch-data 1 get} def
+/ch-height {ch-data 2 get} def
+/ch-xoff {ch-data 3 get} def
+/ch-yoff {ch-data 4 get} def
+/ch-tfmw {ch-data 5 get} def
+
+/dotbuilder	% fontdict ch Charbuilder -     -- image one character
+{
+	/ch-code exch def           % save the char code
+	/font-dict exch def         % and the font dict.
+	/ch-data font-dict /BitMaps get ch-code get def 
+	/dotsize font-dict /DotSize get def
+	dotsize 0 le
+	{
+		/ydir -1 def /dotsize dotsize neg def
+		/yoff dotsize ch-yoff sub 1 add def 
+	}
+	{
+		/ydir 1 def /yoff ch-yoff def 
+	}
+	ifelse
+	% get the bitmap descriptor for char
+	ch-image null eq
+	ch-width 0 eq or
+	ch-height 0 eq or
+	not
+	{ 
+%		1 0 0 0 1 1 setcachedevice	% Can't use cache!!
+		ch-tfmw 0 setcharwidth
+		1 dotsize div dup scale
+		ch-width ch-height true [1 0 0 ydir ch-xoff yoff]
+			{ch-image} imagemask
+	} if
+} def
+
+/definedot	% image ch definedot  - define a dot font
+{	
+	/ch-code exch def
+	/ch-data exch def
+	currentfont /BitMaps get ch-code ch-data put
+	currentfont /Encoding get ch-code 
+	dup (   ) cvs cvn   % generate a unique name from the character code
+	put
+} def
+
+/newoutlinefont		% fontid newoutlinefont --- 
+			%	initialize a new dot font dictionary 
+{
+	/newname exch def
+	/fsize 256 def
+	newname 10 dict def		% allocate new font dictionary 
+	newname load begin
+		/FontName newname def
+		/FontType 3 def			% user font type
+		/FontMatrix [.001 0 0 .001 0 0] def
+		/FontBBox [0 0 1000 1000] def
+		/CharProcs fsize array def
+		/BuildChar {outlinebuilder} def
+		/Encoding fsize array def
+		/DefineProc {defineoutline} def
+		/KanjiPS 0 def
+		0 1 fsize 1 sub {Encoding exch /.notdef put} for
+	end
+	newname newname load definefont pop
+} def
+
+/outlinebuilder		% fontdict ch Charbuilder -  draw one charcter
+{
+	/ch-code exch def           % save the char code
+	/font-dict exch def         % and the font dict.
+%	1 0 0 0 1 1 setcachedevice	% Can't use cache!!
+	1000 0 setcharwidth		% Use this instead..
+	font-dict /CharProcs get ch-code get cvx exec
+} def
+
+/defineoutline		% proc ch defineoutline  - define an outline font
+{	
+	/ch-code exch def
+	/ch-proc exch cvlit def
+	currentfont /CharProcs get ch-code ch-proc put
+	currentfont /Encoding get ch-code 
+	dup (   ) cvs cvn   % generate a unique name from the character code
+	put
+} def
+
+/strconv {
+	currentfont /KanjiPS known { % user defined font
+%	currentfont /FontType get 3 eq { % user defined font
+		dup /EUCstr exch def length 2 idiv /len exch def
+		/str len string def
+		/fontname 20 string def
+		currentfont /FontName get fontname cvs
+		/defineproc currentfont /DefineProc get def
+		dup length 5 add string /codestr exch def
+		codestr exch 5 exch putinterval
+		codestr 0 (k) putinterval
+		/hexstr 2 string def
+		0 1 len 1 sub {
+			/index exch def
+			str index index put
+			index 2 mul EUCstr exch get 16 hexstr cvrs 
+			codestr exch 1 exch putinterval
+			index 2 mul 1 add EUCstr exch get 16 hexstr cvrs 
+			codestr exch 3 exch putinterval
+			codestr cvn 
+			$kdata begin load end
+			index defineproc
+		} for
+		str
+	} if
+} def
+/$$charpath /charpath load def
+/$$stringwidth /stringwidth load def
+/$$show /show load def
+/$$ashow /ashow load def
+/$$kshow /kshow load def
+end % $kanjips
+$kdata begin
+/E { /exec load } bind def
+end
+%
+%	ReDefinition of operators like 'show.'
+%
+/charpath { $kanjips begin exch strconv exch $$charpath end } def
+/stringwidth { $kanjips begin /S save def
+strconv $$stringwidth S restore end } def
+/show {
+	$kanjips begin /S save def
+	strconv $$show currentpoint S restore moveto end
+} def
+/ashow {
+	$kanjips begin /S save def
+	strconv $$ashow currentpoint S restore moveto end
+} def
+/kshow {
+	$kanjips begin /S save def
+	strconv $$kshow currentpoint S restore moveto end
+} def
+

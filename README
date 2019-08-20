@@ -1,0 +1,22 @@
+漢字PostScriptを英数字のみのPostScriptに変換するフィルタ"kanjips"と
+それを使ったツールです。
+
+
+	kanjips:	漢字PostScriptフィルタ
+	jenscript:	テキスト→PostScriptフィルタ
+	mp:		mail/news→PostScriptフィルタ
+	samples:	漢字PostScriptサンプルファイル
+
+
+"Configure"を起動して、問われるままに答えた後makeすればできあがりです。
+漢字フォントはどれかひとつでもあればいいです。
+
+フォントを格納するディレクトリは":"で区切って複数指定することができます。
+(例: "/usr/local/font1:/usr/local/font2")
+フォント名を複数指定するときは","で区切って下さい。(例: "jis16,jis24")
+
+各ツールの動作については各ディレクトリの下のREADMEファイルを参照
+して下さい。
+
+バグ情報・要望などは masui@cs.cmu.edu または masui@shpcsl.sharp.co.jp
+までお送り下さい。
